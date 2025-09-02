@@ -168,9 +168,16 @@ async function loadTemplates(baseDir: string): Promise<TemplateMap> {
       const r = rel ? path.join(rel, e.name) : e.name;
       if (e.isDirectory()) {
         await walk(abs, r);
-      } else if (e.isFile() && e.name.endsWith(".ts")) {
-        const content = await fsp.readFile(abs, "utf8");
-        out[r] = content;
+      } else if (e.isFile()) {
+        // Include TypeScript files and environment example files
+        if (
+          e.name.endsWith(".ts") ||
+          e.name === ".env.example" ||
+          e.name.endsWith(".env.example")
+        ) {
+          const content = await fsp.readFile(abs, "utf8");
+          out[r] = content;
+        }
       }
     }
   }
