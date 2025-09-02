@@ -1,6 +1,14 @@
 # JL NestJS Generator
 
-A powerful CLI tool to generate NestJS JWT authentication and CRUD templates by **JosephLondono**.
+A powerful CLI tool to generate NestJS JWT authentication and CRUD templates with **enhanced user experience** by **JosephLondono**.
+
+## ✨ What's New
+
+- 🎨 **Beautiful CLI output** with colors and emojis
+- 📄 **Automatic .env.example** generation for JWT configuration
+- 🎯 **Smart dependency detection** - shows only what you need
+- 💬 **Enhanced user experience** with gratitude messages and clear guidance
+- 🔧 **Improved template loading** for configuration files
 
 ## 🚀 Quick Start
 
@@ -20,43 +28,58 @@ npx jl-nestjs-generator all
 npx jl-nestjs-generator jwt --target ./my-project/src
 ```
 
-## 📦 Required Dependencies
+## 📦 Dependencies & Installation
 
-After running the generator, install the required NestJS dependencies:
+The generator provides **smart dependency detection** that shows only the packages you need based on your chosen modules.
 
-### For npm:
+### JWT Authentication Dependencies
+
+When generating JWT auth modules, you'll need these packages:
 
 ```bash
-npm install @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt
-npm install --save-dev @types/bcrypt
+# For npm
+npm install @nestjs/jwt
+
+# For yarn
+yarn add @nestjs/jwt
+
+# For pnpm
+pnpm add @nestjs/jwt
+
+# For bun
+bun add @nestjs/jwt
 ```
 
-### For yarn:
+### CRUD Module Dependencies
+
+CRUD modules use basic NestJS dependencies that are typically already installed:
+
+- `@nestjs/common`
+- `@nestjs/core`
+
+### Complete Application Dependencies
+
+When generating both JWT + CRUD modules:
 
 ```bash
-yarn add @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt
-yarn add --dev @types/bcrypt
-```
+# For npm
+npm install @nestjs/jwt
 
-### For pnpm:
+# For yarn
+yarn add @nestjs/jwt
 
-```bash
-pnpm add @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt
-pnpm add --save-dev @types/bcrypt
-```
+# For pnpm
+pnpm add @nestjs/jwt
 
-### For bun:
-
-```bash
-bun add @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt
-bun add --dev @types/bcrypt
+# For bun
+bun add @nestjs/jwt
 ```
 
 ## ✨ Features
 
 ### 🔐 JWT Authentication System
 
-Generates a complete JWT authentication system:
+Generates a complete JWT authentication:
 
 - **auth.module.ts** - Authentication module with JWT configuration
 - **auth.service.ts** - Service with user validation and JWT generation
@@ -68,6 +91,7 @@ Generates a complete JWT authentication system:
 - **roles.ts** - Role enum (User, Admin)
 - **auth.decorator.ts** - Custom `@Auth()` decorator with role support
 - **roles.guard.ts** - Role-based authorization guard
+- **📄 .env.example** - Pre-configured environment variables template
 
 ### 📊 CRUD Module Generator
 
@@ -83,15 +107,17 @@ Generates customizable CRUD modules with:
 - **With Auth** (default): All endpoints protected with JWT + roles
 - **Without Auth**: Clean CRUD endpoints without authentication
 
-### 🛠️ Smart Features
+### 🛠️ Enhanced CLI Experience
 
+- ✅ **🎨 Colorful output** with emojis and clear formatting
 - ✅ **Interactive prompts** for module names and configuration
 - ✅ **Auto-import** modules to `app.module.ts`
 - ✅ **Flexible authentication** - optional for CRUD modules
-- ✅ **Dependency guidance** - shows required packages to install
-- ✅ **Type-safe** TypeScript templates
+- ✅ **Environment configuration** - automatic `.env.example` generation
+- ✅ **Type-safe** TypeScript templates with automatic cleanup
 - ✅ **Role-based access control** (User, Admin)
 - ✅ **Clean code structure** following NestJS best practices
+- ✅ **Gratitude messages** - friendly user experience
 
 ## 📋 Usage Examples
 
@@ -131,6 +157,7 @@ npx jl-nestjs-generator all --target ./backend/src
 
 ```
 src/
+├── .env.example          # 🆕 Environment configuration template
 ├── auth/
 │   ├── auth.controller.ts
 │   ├── auth.module.ts
@@ -158,6 +185,28 @@ src/
     ├── users.module.ts
     └── users.service.ts
 ```
+
+## ⚙️ Environment Configuration
+
+When generating JWT authentication, the CLI automatically creates a `.env.example` file with pre-configured settings:
+
+```bash
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRES_IN=24h
+
+# App Configuration
+PORT=3000
+NODE_ENV=development
+```
+
+### Quick Setup:
+
+1. **Copy the template**: `cp .env.example .env`
+2. **Update JWT_SECRET**: Replace with a secure random string
+3. **Configure as needed**: Adjust port, expiration time, etc.
+
+> 🔒 **Security Tip**: Always use a strong, unique JWT_SECRET in production!
 
 ## 🔒 Authentication Flow
 
@@ -191,6 +240,43 @@ export class UsersController {
 }
 ```
 
+## 🎨 CLI Experience
+
+The generator provides a beautiful, user-friendly command line experience:
+
+### 🌈 Visual Features
+
+- **Colorful output** with meaningful colors for different message types
+- **Emoji indicators** for quick visual recognition
+- **Progress messages** showing each file being created
+- **Smart dependency detection** showing only what you need
+- **Gratitude messages** for a pleasant development experience
+
+### 📝 Example Output
+
+```bash
+🔐 Generating JWT Authentication Module...
+
+✅ Created .env.example
+✅ Created auth/auth.controller.ts
+✅ Created auth/auth.module.ts
+...
+
+🎉 JWT template generation complete!
+
+🔔 IMPORTANT: Install the required dependencies for JWT Authentication:
+
+For npm:
+  npm install @nestjs/jwt
+
+🎯 Next steps:
+  1. Install the dependencies above
+  2. Copy .env.example to .env and configure JWT secrets
+  3. Start your NestJS application
+
+🙏 Thank you for using this package. Wishing you productive development with NestJS!
+```
+
 ## 🧑‍💻 Development
 
 ```bash
@@ -210,14 +296,6 @@ npm run dev jwt
 # Or test with local project
 npm run dev all --target ./test-project
 ```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## 📝 License
 
