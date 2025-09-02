@@ -1,19 +1,31 @@
 {
   "name": "jl-nestjs-generator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A CLI tool to generate NestJS JWT authentication and CRUD templates",
   "author": "JosephLondono",
   "license": "MIT",
   "keywords": ["nestjs", "cli", "generator", "jwt", "crud", "template"],
   "module": "index.ts",
   "type": "commonjs",
-  "bin": {
-    "nest-gen": "./dist/index.js"
+  "bin": "./dist/index.js",
+  "main": "./dist/index.js",
+  "files": [
+    "dist/",
+    "src/modules/*/template/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JosephLondono/Nestjs-Template-Generator.git"
+  },
+  "homepage": "https://github.com/JosephLondono/Nestjs-Template-Generator#readme",
+  "bugs": {
+    "url": "https://github.com/JosephLondono/Nestjs-Template-Generator/issues"
   },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
@@ -22,5 +34,8 @@
   },
   "dependencies": {
     "fs-extra": "^11.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }

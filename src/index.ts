@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import fs from "fs";
 import path from "path";
 import { promises as fsp } from "fs";
@@ -88,7 +90,9 @@ async function copyTemplatesForBuild() {
 }
 
 function usage() {
-  console.log("Usage: nest-gen <jwt|crud|all> [--target <path>]");
+  console.log(
+    "Usage: npx jl-nestjs-generator <jwt|crud|all> [--target <path>]"
+  );
   console.log("Commands:");
   console.log("  jwt   - Generate JWT auth module");
   console.log("  crud  - Generate CRUD module");
@@ -97,6 +101,12 @@ function usage() {
   console.log(
     "  --target <path>  - Target directory (defaults to current directory)"
   );
+  console.log("");
+  console.log("Examples:");
+  console.log("  npx jl-nestjs-generator jwt");
+  console.log("  npx jl-nestjs-generator crud");
+  console.log("  npx jl-nestjs-generator all");
+  console.log("  npx jl-nestjs-generator jwt --target ./src");
 }
 
 async function insertImportToAppModule(

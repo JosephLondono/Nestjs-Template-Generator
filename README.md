@@ -2,26 +2,22 @@
 
 A CLI tool to generate NestJS JWT authentication and CRUD templates by **JosephLondono**.
 
-## Installation
-
-```bash
-npm install -g jl-nestjs-generator
-```
-
 ## Usage
+
+No installation required! Use with npx:
 
 ```bash
 # Generate JWT authentication module
-nest-gen jwt
+npx jl-nestjs-generator jwt
 
 # Generate CRUD module (will ask for module name)
-nest-gen crud
+npx jl-nestjs-generator crud
 
 # Generate both JWT and CRUD modules
-nest-gen all
+npx jl-nestjs-generator all
 
 # Specify target directory
-nest-gen jwt --target ./my-project
+npx jl-nestjs-generator jwt --target ./my-project
 ```
 
 ## Features
@@ -48,19 +44,35 @@ Generates a customizable CRUD module:
 - `[name].service.ts` - Service with CRUD operations
 - `[name].controller.ts` - Controller with protected endpoints
 
+## Examples
+
+```bash
+# In any NestJS project directory
+npx jl-nestjs-generator jwt
+
+# Create a users CRUD module
+echo "users" | npx jl-nestjs-generator crud
+
+# Generate complete auth + products module
+echo "products" | npx jl-nestjs-generator all
+
+# Generate in specific directory
+npx jl-nestjs-generator jwt --target ./backend/src
+```
+
 ## Development
 
 ```bash
 # Clone and install
-git clone <repository-url>
+git clone https://github.com/JosephLondono/Nestjs-Template-Generator.git
 cd nestjs-template-generator
 npm install
 
 # Build
 npm run build
 
-# Link for local development
-npm link
+# Test locally
+npm run dev
 ```
 
 ## Author
