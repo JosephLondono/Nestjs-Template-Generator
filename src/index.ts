@@ -7,46 +7,82 @@ import { TemplateMap } from "./types";
 import * as readline from "readline";
 import chalk from "chalk";
 
+// Function to show thank you message at the end
+function showThankYouMessage() {
+  console.log(chalk.gray("\n\n"));
+  console.log(
+    chalk.magenta.bold(
+      "🙏 Thank you for using this package. Wishing you productive development with NestJS!"
+    )
+  );
+}
+
 // Function to display dependency installation message
-function showDependencyMessage() {
+function showDependencyMessage(moduleType: "jwt" | "crud" | "all" = "all") {
+  const dependencies = {
+    jwt: {
+      production: "@nestjs/jwt",
+      dev: "",
+    },
+    crud: {
+      production: "",
+      dev: "",
+    },
+    all: {
+      production: "@nestjs/jwt",
+      dev: "",
+    },
+  };
+
+  // Don't show message for CRUD only (it uses basic NestJS dependencies)
+  if (moduleType === "crud") {
+    console.log(
+      chalk.cyan("\n� ") +
+        chalk.bold.cyan(
+          "NOTE: CRUD module uses basic NestJS dependencies that should already be installed.\n"
+        )
+    );
+    return;
+  }
+
+  const deps = dependencies[moduleType];
+  const moduleTitle =
+    moduleType === "jwt" ? "JWT Authentication" : "Complete NestJS Application";
+
   console.log(
     chalk.cyan("\n🔔 ") +
       chalk.bold.cyan(
-        "IMPORTANT: Install the required dependencies for NestJS and JWT:\n"
+        `IMPORTANT: Install the required dependencies for ${moduleTitle}:\n`
       )
   );
 
   console.log(chalk.yellow.bold("For npm:"));
-  console.log(
-    chalk.white(
-      "  npm install @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt"
-    )
-  );
-  console.log(chalk.white("  npm install --save-dev @types/bcrypt\n"));
+  console.log(chalk.white(`  npm install ${deps.production}`));
+  if (deps.dev) {
+    console.log(chalk.white(`  npm install --save-dev ${deps.dev}`));
+  }
+  console.log();
 
   console.log(chalk.yellow.bold("For yarn:"));
-  console.log(
-    chalk.white(
-      "  yarn add @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt"
-    )
-  );
-  console.log(chalk.white("  yarn add --dev @types/bcrypt\n"));
+  console.log(chalk.white(`  yarn add ${deps.production}`));
+  if (deps.dev) {
+    console.log(chalk.white(`  yarn add --dev ${deps.dev}`));
+  }
+  console.log();
 
   console.log(chalk.yellow.bold("For pnpm:"));
-  console.log(
-    chalk.white(
-      "  pnpm add @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt"
-    )
-  );
-  console.log(chalk.white("  pnpm add --save-dev @types/bcrypt\n"));
+  console.log(chalk.white(`  pnpm add ${deps.production}`));
+  if (deps.dev) {
+    console.log(chalk.white(`  pnpm add --save-dev ${deps.dev}`));
+  }
+  console.log();
 
   console.log(chalk.yellow.bold("For bun:"));
-  console.log(
-    chalk.white(
-      "  bun add @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt"
-    )
-  );
-  console.log(chalk.white("  bun add --dev @types/bcrypt\n"));
+  console.log(chalk.white(`  bun add ${deps.production}`));
+  if (deps.dev) {
+    console.log(chalk.white(`  bun add --dev ${deps.dev}`));
+  }
+  console.log();
 
   console.log(
     chalk.red.bold("Don't forget to add these dependencies to your project!")
@@ -54,9 +90,14 @@ function showDependencyMessage() {
   console.log(chalk.gray("━".repeat(75)));
   console.log(chalk.green("\n🎯 Next steps:"));
   console.log(chalk.white("  1. Install the dependencies above"));
-  console.log(chalk.white("  2. Copy .env.example to .env and configure"));
-  console.log(chalk.white("  3. Start your NestJS application"));
-  console.log(chalk.gray("\n💡 For setup instructions, check SETUP.md\n"));
+  if (moduleType === "jwt" || moduleType === "all") {
+    console.log(
+      chalk.white("  2. Copy .env.example to .env and configure JWT secrets")
+    );
+    console.log(chalk.white("  3. Start your NestJS application"));
+  } else {
+    console.log(chalk.white("  2. Start your NestJS application"));
+  }
 }
 
 async function askQuestion(question: string): Promise<string> {
@@ -430,7 +471,8 @@ async function run() {
       );
 
     console.log(chalk.green.bold("\n🎉 JWT template generation complete!"));
-    showDependencyMessage();
+    showDependencyMessage("jwt");
+    showThankYouMessage();
     process.exit(0);
   }
 
@@ -485,7 +527,8 @@ async function run() {
       );
 
     console.log(chalk.green.bold("\n🎉 CRUD template generation complete!"));
-    showDependencyMessage();
+    showDependencyMessage("crud");
+    showThankYouMessage();
     process.exit(0);
   }
 
@@ -560,7 +603,8 @@ async function run() {
     console.log(chalk.white("Your NestJS application now includes:"));
     console.log(chalk.green("  • JWT Authentication system"));
     console.log(chalk.green(`  • ${capitalizedCrudName} CRUD module`));
-    showDependencyMessage();
+    showDependencyMessage("all");
+    showThankYouMessage();
     process.exit(0);
   }
 
