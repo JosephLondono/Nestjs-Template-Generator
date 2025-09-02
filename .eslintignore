@@ -1,0 +1,16 @@
+# Ignore template files as they are code generation templates
+src/modules/*/template/**
+src/modules/auth/template/**
+src/modules/crud/template/**
+**/template/**
+
+# Ignore build files
+dist/
+node_modules/
+
+# Ignore test files
+**/*.test.ts
+**/*.spec.ts
+
+# Ignore generated files
+*.d.ts

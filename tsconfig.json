@@ -2,13 +2,35 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
+    "lib": ["ES2020"],
     "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "noEmitOnError": false
   },
   "include": ["src/index.ts", "src/types.ts", "src/modules/*/index.ts"],
-  "exclude": ["dist"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "src/modules/*/template/**",
+    "src/modules/auth/template/**",
+    "src/modules/crud/template/**",
+    "**/template/**/*.ts",
+    "**/template/**/*.js",
+    "**/template/**"
+  ]
 }

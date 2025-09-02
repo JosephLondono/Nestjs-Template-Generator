@@ -5,6 +5,59 @@ import path from "path";
 import { promises as fsp } from "fs";
 import { TemplateMap } from "./types";
 import * as readline from "readline";
+import chalk from "chalk";
+
+// Function to display dependency installation message
+function showDependencyMessage() {
+  console.log(
+    chalk.cyan("\n🔔 ") +
+      chalk.bold.cyan(
+        "IMPORTANT: Install the required dependencies for NestJS and JWT:\n"
+      )
+  );
+
+  console.log(chalk.yellow.bold("For npm:"));
+  console.log(
+    chalk.white(
+      "  npm install @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt"
+    )
+  );
+  console.log(chalk.white("  npm install --save-dev @types/bcrypt\n"));
+
+  console.log(chalk.yellow.bold("For yarn:"));
+  console.log(
+    chalk.white(
+      "  yarn add @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt"
+    )
+  );
+  console.log(chalk.white("  yarn add --dev @types/bcrypt\n"));
+
+  console.log(chalk.yellow.bold("For pnpm:"));
+  console.log(
+    chalk.white(
+      "  pnpm add @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt"
+    )
+  );
+  console.log(chalk.white("  pnpm add --save-dev @types/bcrypt\n"));
+
+  console.log(chalk.yellow.bold("For bun:"));
+  console.log(
+    chalk.white(
+      "  bun add @nestjs/common @nestjs/core @nestjs/jwt class-validator class-transformer bcrypt"
+    )
+  );
+  console.log(chalk.white("  bun add --dev @types/bcrypt\n"));
+
+  console.log(
+    chalk.red.bold("Don't forget to add these dependencies to your project!")
+  );
+  console.log(chalk.gray("━".repeat(75)));
+  console.log(chalk.green("\n🎯 Next steps:"));
+  console.log(chalk.white("  1. Install the dependencies above"));
+  console.log(chalk.white("  2. Copy .env.example to .env and configure"));
+  console.log(chalk.white("  3. Start your NestJS application"));
+  console.log(chalk.gray("\n💡 For setup instructions, check SETUP.md\n"));
+}
 
 async function askQuestion(question: string): Promise<string> {
   const rl = readline.createInterface({
@@ -13,7 +66,7 @@ async function askQuestion(question: string): Promise<string> {
   });
 
   return new Promise((resolve) => {
-    rl.question(question, (answer) => {
+    rl.question(chalk.cyan("❓ ") + chalk.bold(question), (answer) => {
       rl.close();
       resolve(answer.trim());
     });
@@ -23,16 +76,46 @@ async function askQuestion(question: string): Promise<string> {
 function replaceInTemplate(
   content: string,
   oldName: string,
-  newName: string
+  newName: string,
+  removeAuth: boolean = false
 ): string {
-  // Capitalize first letter for class names
-  const capitalizedOld = oldName.charAt(0).toUpperCase() + oldName.slice(1);
-  const capitalizedNew = newName.charAt(0).toUpperCase() + newName.slice(1);
+  let result = content;
 
-  // Replace all occurrences
-  return content
-    .replace(new RegExp(capitalizedOld, "g"), capitalizedNew)
-    .replace(new RegExp(oldName, "g"), newName);
+  // Only apply name replacements if they're not dummy values
+  if (oldName !== "placeholder" && newName !== "placeholder") {
+    // Capitalize first letter for class names
+    const capitalizedOld = oldName.charAt(0).toUpperCase() + oldName.slice(1);
+    const capitalizedNew = newName.charAt(0).toUpperCase() + newName.slice(1);
+
+    result = result
+      .replace(new RegExp(capitalizedOld, "g"), capitalizedNew)
+      .replace(new RegExp(oldName, "g"), newName);
+  }
+
+  // Remove @Auth() decorators if requested
+  if (removeAuth) {
+    // Remove import statement for Auth decorator
+    result = result.replace(
+      /import\s*{\s*Auth\s*}\s*from\s*['"'][^'"]*['"];\s*\n?/g,
+      ""
+    );
+
+    // Remove @Auth() decorators (with or without parameters)
+    result = result.replace(/@Auth\([^)]*\)\s*\n\s*/g, "");
+    result = result.replace(/@Auth\(\)\s*\n\s*/g, "");
+
+    // Remove JWT module import from CRUD module if no auth is used
+    result = result.replace(
+      /import\s*{\s*JwtModule\s*}\s*from\s*['"'][^'"]*['"];\s*\n?/g,
+      ""
+    );
+    result = result.replace(/JwtModule,?\s*/g, "");
+
+    // Clean up empty imports array
+    result = result.replace(/imports:\s*\[\s*\],?\s*\n?/g, "");
+  }
+
+  return result;
 }
 
 async function loadTemplates(baseDir: string): Promise<TemplateMap> {
@@ -82,31 +165,64 @@ async function copyTemplatesForBuild() {
 
     try {
       await copyRecursive(sourceDir, destDir);
-      console.log("Templates copied successfully for build");
+      console.log(chalk.green("✅ Templates copied successfully for build"));
     } catch (error) {
-      console.error("Error copying templates:", error);
+      console.error(chalk.red("❌ Error copying templates:"), error);
     }
   }
 }
 
 function usage() {
+  console.log(chalk.bold.blue("\n🚀 JL NestJS Generator"));
   console.log(
-    "Usage: npx jl-nestjs-generator <jwt|crud|all> [--target <path>]"
+    chalk.gray("Generate NestJS JWT authentication and CRUD templates\n")
   );
-  console.log("Commands:");
-  console.log("  jwt   - Generate JWT auth module");
-  console.log("  crud  - Generate CRUD module");
-  console.log("  all   - Generate both auth and crud modules");
-  console.log("Options:");
+
+  console.log(chalk.bold("Usage:"));
   console.log(
-    "  --target <path>  - Target directory (defaults to current directory)"
+    chalk.white("  npx jl-nestjs-generator <jwt|crud|all> [--target <path>]\n")
   );
-  console.log("");
-  console.log("Examples:");
-  console.log("  npx jl-nestjs-generator jwt");
-  console.log("  npx jl-nestjs-generator crud");
-  console.log("  npx jl-nestjs-generator all");
-  console.log("  npx jl-nestjs-generator jwt --target ./src");
+
+  console.log(chalk.bold("Commands:"));
+  console.log(
+    chalk.green("  jwt   ") + chalk.white("- Generate JWT auth module")
+  );
+  console.log(
+    chalk.green("  crud  ") +
+      chalk.white("- Generate CRUD module (with optional auth)")
+  );
+  console.log(
+    chalk.green("  all   ") +
+      chalk.white("- Generate both auth and crud modules\n")
+  );
+
+  console.log(chalk.bold("Options:"));
+  console.log(
+    chalk.yellow("  --target <path>  ") +
+      chalk.white("- Target directory (defaults to current directory)\n")
+  );
+
+  console.log(chalk.bold("Features:"));
+  console.log(
+    chalk.green("  • ") + chalk.white("Interactive prompts for module names")
+  );
+  console.log(
+    chalk.green("  • ") +
+      chalk.white("Optional @Auth() decorators for CRUD operations")
+  );
+  console.log(
+    chalk.green("  • ") +
+      chalk.white("Automatic dependency detection and installation guide")
+  );
+  console.log(
+    chalk.green("  • ") + chalk.white("Auto-import modules to app.module.ts\n")
+  );
+
+  console.log(chalk.bold("Examples:"));
+  console.log(chalk.gray("  npx jl-nestjs-generator jwt"));
+  console.log(chalk.gray("  npx jl-nestjs-generator crud"));
+  console.log(chalk.gray("  npx jl-nestjs-generator all"));
+  console.log(chalk.gray("  npx jl-nestjs-generator jwt --target ./src\n"));
 }
 
 async function insertImportToAppModule(
@@ -189,6 +305,12 @@ async function run() {
     process.exit(0);
   }
 
+  // Show help for --help or -h
+  if (args.includes("--help") || args.includes("-h")) {
+    usage();
+    process.exit(0);
+  }
+
   const cmd = args[0];
   const targetFlagIndex = args.indexOf("--target");
   let targetRaw =
@@ -208,7 +330,12 @@ async function run() {
         if (name.includes("generator") || name.includes("nestjs-generator")) {
           const defaultTarget = path.join(targetRaw, "generate");
           console.log(
-            `No --target provided and running inside generator repo; using default target: ${defaultTarget}`
+            chalk.yellow(
+              "⚠️  No --target provided and running inside generator repo;"
+            )
+          );
+          console.log(
+            chalk.yellow(`    using default target: ${defaultTarget}`)
           );
           targetRaw = defaultTarget;
           await ensureDir(targetRaw);
@@ -233,22 +360,34 @@ async function run() {
 
   async function writeTemplates(
     templates: TemplateMap,
-    options: { oldName?: string; newName?: string } = {}
+    options: { oldName?: string; newName?: string; removeAuth?: boolean } = {}
   ) {
     for (const [relPath, content] of Object.entries(templates)) {
       let finalContent = String(content);
       let finalPath = relPath;
+
+      // Always remove @ts-nocheck from generated files
+      finalContent = finalContent.replace(/^\/\/ @ts-nocheck\s*\n?/gm, "");
 
       // If we have replacement options, apply them
       if (options.oldName && options.newName) {
         finalContent = replaceInTemplate(
           finalContent,
           options.oldName,
-          options.newName
+          options.newName,
+          options.removeAuth || false
         );
         finalPath = relPath.replace(
           new RegExp(options.oldName, "g"),
           options.newName
+        );
+      } else if (options.removeAuth) {
+        // Apply auth removal even without name replacement
+        finalContent = replaceInTemplate(
+          finalContent,
+          "placeholder", // dummy values
+          "placeholder",
+          true
         );
       }
 
@@ -256,11 +395,11 @@ async function run() {
       const dir = path.dirname(filePath);
       await ensureDir(dir);
       if (fs.existsSync(filePath)) {
-        console.log(`Skipped ${filePath} (already exists)`);
+        console.log(chalk.yellow(`⏭️  Skipped ${filePath} (already exists)`));
         continue;
       }
       await fsp.writeFile(filePath, finalContent, "utf8");
-      console.log(`Created ${filePath}`);
+      console.log(chalk.green(`✅ Created ${filePath}`));
     }
   }
 
@@ -270,6 +409,10 @@ async function run() {
   }
 
   if (cmd === "jwt") {
+    console.log(
+      chalk.blue.bold("\n🔐 Generating JWT Authentication Module...\n")
+    );
+
     await writeTemplates(authTemplates);
 
     const modified = await insertImportToAppModule(projectSrc, [
@@ -278,65 +421,112 @@ async function run() {
         name: "AuthModule",
       },
     ]);
+
     if (modified)
-      console.log("Updated app.module to import AuthModule (if present).");
+      console.log(chalk.green("✅ Updated app.module to import AuthModule"));
     else
       console.log(
-        "No app.module found or could not modify it. Add AuthModule import manually."
+        chalk.yellow("⚠️  No app.module found - Add AuthModule import manually")
       );
 
-    console.log("JWT template generation complete.");
+    console.log(chalk.green.bold("\n🎉 JWT template generation complete!"));
+    showDependencyMessage();
     process.exit(0);
   }
 
   if (cmd === "crud") {
-    const moduleName = await askQuestion("Write the crud name: ");
-    if (!moduleName) {
-      console.log("Module name is required!");
-      process.exit(1);
-    }
+    console.log(chalk.blue.bold("\n📊 Generating CRUD Module...\n"));
+
+    const moduleName = await askQuestion(
+      chalk.cyan("📝 Enter the CRUD module name: ")
+    );
+
+    const includeAuth = await askQuestion(
+      chalk.cyan(
+        "❓ Do you want to include authentication (@Auth() decorator)? (y/n): "
+      )
+    );
+
+    const useAuth =
+      includeAuth.toLowerCase() === "y" || includeAuth.toLowerCase() === "yes";
+
+    console.log(
+      useAuth
+        ? chalk.green("✓ Including authentication decorators")
+        : chalk.blue("✓ Generating without authentication")
+    );
 
     await writeTemplates(crudTemplates, {
       oldName: "crud",
       newName: moduleName,
+      removeAuth: !useAuth,
     });
 
-    const capitalizedName =
+    const capitalizedModuleName =
       moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
     const modified = await insertImportToAppModule(projectSrc, [
       {
-        line: `import { ${capitalizedName}Module } from './${moduleName}/${moduleName}.module';`,
-        name: `${capitalizedName}Module`,
+        line: `import { ${capitalizedModuleName}Module } from './${moduleName}/${moduleName}.module';`,
+        name: `${capitalizedModuleName}Module`,
       },
     ]);
+
     if (modified)
       console.log(
-        `Updated app.module to import ${capitalizedName}Module (if present).`
+        chalk.green(
+          `✅ Updated app.module to import ${capitalizedModuleName}Module`
+        )
       );
     else
       console.log(
-        `No app.module found or could not modify it. Add ${capitalizedName}Module import manually.`
+        chalk.yellow(
+          `⚠️  No app.module found - Add ${capitalizedModuleName}Module import manually`
+        )
       );
 
-    console.log(`${capitalizedName} template generation complete.`);
+    console.log(chalk.green.bold("\n🎉 CRUD template generation complete!"));
+    showDependencyMessage();
     process.exit(0);
   }
 
   if (cmd === "all" || cmd === "generate") {
-    // Generate JWT auth templates
+    console.log(
+      chalk.blue.bold("\n🚀 Generating Complete NestJS Application...\n")
+    );
+
+    console.log(chalk.yellow("📋 Generating JWT Authentication Module..."));
     await writeTemplates(authTemplates);
 
-    // Ask for CRUD module name
-    const crudModuleName = await askQuestion("Write the crud name: ");
+    console.log(chalk.yellow("\n📋 Generating CRUD Module..."));
+
+    const crudModuleName = await askQuestion(
+      chalk.cyan("📝 Enter the CRUD module name: ")
+    );
+
     if (!crudModuleName) {
-      console.log("CRUD module name is required!");
+      console.log(chalk.red("❌ CRUD module name is required!"));
       process.exit(1);
     }
 
-    // Generate CRUD templates with custom name
+    const includeAuth = await askQuestion(
+      chalk.cyan(
+        "❓ Do you want to include authentication for CRUD (@Auth() decorator)? (y/n): "
+      )
+    );
+
+    const useAuth =
+      includeAuth.toLowerCase() === "y" || includeAuth.toLowerCase() === "yes";
+
+    console.log(
+      useAuth
+        ? chalk.green("✓ Including authentication decorators")
+        : chalk.blue("✓ Generating without authentication")
+    );
+
     await writeTemplates(crudTemplates, {
       oldName: "crud",
       newName: crudModuleName,
+      removeAuth: !useAuth,
     });
 
     const capitalizedCrudName =
@@ -355,14 +545,22 @@ async function run() {
 
     if (modified)
       console.log(
-        `Updated app.module to import AuthModule and ${capitalizedCrudName}Module (if present).`
+        chalk.green(
+          `✅ Updated app.module to import AuthModule and ${capitalizedCrudName}Module`
+        )
       );
     else
       console.log(
-        "No app.module found or could not modify it. Add imports manually."
+        chalk.yellow("⚠️  No app.module found - Add imports manually")
       );
 
-    console.log("All templates generation complete.");
+    console.log(
+      chalk.green.bold("\n🎉 Complete application generation finished!")
+    );
+    console.log(chalk.white("Your NestJS application now includes:"));
+    console.log(chalk.green("  • JWT Authentication system"));
+    console.log(chalk.green(`  • ${capitalizedCrudName} CRUD module`));
+    showDependencyMessage();
     process.exit(0);
   }
 
@@ -370,6 +568,6 @@ async function run() {
 }
 
 run().catch((err) => {
-  console.error("Error:", err);
+  console.error(chalk.red("❌ Error:"), err);
   process.exit(1);
 });

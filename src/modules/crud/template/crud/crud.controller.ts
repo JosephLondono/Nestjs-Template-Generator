@@ -1,38 +1,69 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
-import { CrudService } from './crud.service';
-import { Auth } from '../common/decorators/auth.decorator';
+// @ts-nocheck
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+} from "@nestjs/common";
+import { CrudService, CreateCrudDto, UpdateCrudDto } from "./crud.service";
+import { Auth } from "../common/decorators/auth.decorator";
 
-@Controller('crud')
+@Controller("crud")
 export class CrudController {
   constructor(private readonly service: CrudService) {}
 
   @Get()
   @Auth()
-  async findAll() {
-    return await this.service.findAll();
+  @HttpCode(HttpStatus.OK)
+  findAll() {
+    return {
+      message: "Items retrieved successfully",
+      data: this.service.findAll(),
+    };
   }
 
-  @Get(':id')
+  @Get(":id")
   @Auth()
-  async findOne(@Param('id') id: string) {
-    return await this.service.findOne(id);
+  @HttpCode(HttpStatus.OK)
+  findOne(@Param("id") id: string) {
+    return {
+      message: "Item retrieved successfully",
+      data: this.service.findOne(id),
+    };
   }
 
   @Post()
-  @Auth(['Admin'])
-  async create(@Body() body: any) {
-    return await this.service.create(body);
+  @Auth(["Admin"])
+  @HttpCode(HttpStatus.CREATED)
+  create(@Body() createDto: CreateCrudDto) {
+    return {
+      message: "Item created successfully",
+      data: this.service.create(createDto),
+    };
   }
 
-  @Put(':id')
-  @Auth(['Admin'])
-  async update(@Param('id') id: string, @Body() body: any) {
-    return await this.service.update(id, body);
+  @Put(":id")
+  @Auth(["Admin"])
+  @HttpCode(HttpStatus.OK)
+  update(@Param("id") id: string, @Body() updateDto: UpdateCrudDto) {
+    return {
+      message: "Item updated successfully",
+      data: this.service.update(id, updateDto),
+    };
   }
 
-  @Delete(':id')
-  @Auth(['Admin'])
-  async remove(@Param('id') id: string) {
-    return await this.service.remove(id);
+  @Delete(":id")
+  @Auth(["Admin"])
+  @HttpCode(HttpStatus.OK)
+  remove(@Param("id") id: string) {
+    return {
+      message: "Item deleted successfully",
+      data: this.service.remove(id),
+    };
   }
 }
